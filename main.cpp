@@ -6,7 +6,7 @@
 #include "math.h"
 #include "obstacle.h"
 
-#define BOID_COUNT 2000.0f
+#define BOID_COUNT 2500.0f
 
 using namespace std;
 

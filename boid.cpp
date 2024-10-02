@@ -46,7 +46,7 @@ Boid::~Boid() {
 
 void Boid::render() {
 	Rectangle src = Rectangle{ 0, 0, (float)texture->width, (float)texture->height };
-    Vector2 size = Vector2 { 10.0f * scale, 10.0f * scale };
+    Vector2 size = Vector2 { 12.0f * scale, 12.0f * scale };
     Color color;
     switch (team) {
     case Team::Red:
@@ -85,14 +85,14 @@ void Boid::setTeam(Team teamP) {
         preyRange = 100.0f;
         preyStrength = 3.0f;
 
-        predatorRange = 300.0f;
+        predatorRange = 100.0f;
         predatorStrength = 10.0f;
         break;
     case Team::Blue:
         prey = Team::Green;
         predator = Team::Red;
 
-        preyRange = 300.0f;
+        preyRange = 100.0f;
         preyStrength = 10.0f;
 
         predatorRange = 100.0f;
@@ -102,11 +102,11 @@ void Boid::setTeam(Team teamP) {
         prey = Team::Red;
         predator = Team::Blue;
 
-        preyRange = 150.0f;
-        preyStrength = 5.0f;
+        preyRange = 100.0f;
+        preyStrength = 7.0f;
 
-        predatorRange = 150.0f;
-        predatorStrength = 5.0f;
+        predatorRange = 100.0f;
+        predatorStrength = 7.0f;
         break;
     }
 }
