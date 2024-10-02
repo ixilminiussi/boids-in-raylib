@@ -1,40 +1,32 @@
 #define _USE_MATH_DEFINES
 
 #include "boid.h"
+#include "cell.h"
 #include "math.h"
+#include "obstacle.h"
 #include "raylib.h"
 #include "raymath.h"
-#include "obstacle.h"
-#include "cell.h"
 #include <vector>
 
-std::vector<Boid*> Boid::boids = std::vector<Boid*>();
+std::vector<Boid *> Boid::boids = std::vector<Boid *>();
 
-float Boid::alignmentRange = 60.0f;
+float Boid::alignmentRangeSqr = 3600.0f;
 float Boid::alignmentStrength = 7.0f;
-float Boid::separationRange = 20.0f;
+float Boid::separationRangeSqr = 400.0f;
 float Boid::separationStrength = 10.0f;
-float Boid::cohesionRange = 100.0f;
+float Boid::cohesionRangeSqr = 10000.0f;
 float Boid::cohesionStrength = 5.0f;
-float Boid::wallAvoidanceRange = 50.0f;
+float Boid::wallAvoidanceRangeSqr = 2500.0f;
 float Boid::wallAvoidanceStrength = 10.0f;
 float Boid::steerStrength = 10.0f;
 float Boid::cone = 0.2f;
 float Boid::speed = 150.0f;
-float Boid::eatingRange = 3.0f;
+float Boid::eatingRangeSqr = 9.0f;
 
-
-Boid::Boid(const Vector2& positionP, Team teamP, Texture2D *textureP) :
-    texture(textureP),
-    position(positionP),
-    team(teamP),
-    direction(Vector2{ 1.0f, 1.0f }),
-    preyRange(0.0f),
-    preyStrength(0.0f),
-    predatorRange(0.0f),
-    predatorStrength(0.0f),
-    scale(1.0f)
-{
+Boid::Boid(const Vector2 &positionP, Team teamP, Texture2D *textureP)
+    : texture(textureP), position(positionP), team(teamP),
+      direction(Vector2{1.0f, 1.0f}), preyRangeSqr(0.0f), preyStrength(0.0f),
+      predatorRangeSqr(0.0f), predatorStrength(0.0f), scale(1.0f) {
     boids.push_back(this);
     setTeam(team);
 }
@@ -45,29 +37,35 @@ Boid::~Boid() {
 }
 
 void Boid::render() {
-	Rectangle src = Rectangle{ 0, 0, (float)texture->width, (float)texture->height };
-    Vector2 size = Vector2 { 12.0f * scale, 12.0f * scale };
+    Rectangle src =
+        Rectangle{0, 0, (float)texture->width, (float)texture->height};
+    Vector2 size = Vector2{12.0f * scale, 12.0f * scale};
     Color color;
     switch (team) {
     case Team::Red:
-        color = Color{ 255, (unsigned char)(155 * direction.x), (unsigned char)(155 * direction.y), 255 };
+        color = Color{255, (unsigned char)(155 * direction.x),
+                      (unsigned char)(155 * direction.y), 255};
         break;
     case Team::Blue:
-        color = Color{ (unsigned char)(155 * direction.x), (unsigned char)(155 * direction.y), 255, 255 };
+        color = Color{(unsigned char)(155 * direction.x),
+                      (unsigned char)(155 * direction.y), 255, 255};
         break;
     case Team::Green:
-        color = Color{ (unsigned char)(155 * direction.x), 255, (unsigned char)(155 * direction.y), 255 };
+        color = Color{(unsigned char)(155 * direction.x), 255,
+                      (unsigned char)(155 * direction.y), 255};
         break;
     }
-	DrawTexturePro(*texture, src, Rectangle{ position.x, position.y, size.x, size.y }, Vector2{ size.x / 2.0f, size.y / 2.0f }, Vector2Angle({ -1.0f, 0.0f }, direction) * -180.0f / M_PI, color);
+    DrawTexturePro(
+        *texture, src, Rectangle{position.x, position.y, size.x, size.y},
+        Vector2{size.x / 2.0f, size.y / 2.0f},
+        Vector2Angle({-1.0f, 0.0f}, direction) * -180.0f / M_PI, color);
 
     if (debug) {
         DrawCircleLines((int)position.x, (int)position.y, 30.0f * scale, color);
-        for (Cell* c : parent->getNeighbours()) {
+        for (Cell *c : parent->getNeighbours()) {
             if (c == parent) {
                 c->render(WHITE);
-            }
-            else {
+            } else {
                 c->render(RED);
             }
         }
@@ -82,49 +80,51 @@ void Boid::setTeam(Team teamP) {
         prey = Team::Blue;
         predator = Team::Green;
 
-        preyRange = 100.0f;
+        preyRangeSqr = 10000.0f;
         preyStrength = 3.0f;
 
-        predatorRange = 100.0f;
+        predatorRangeSqr = 10000.0f;
         predatorStrength = 10.0f;
         break;
     case Team::Blue:
         prey = Team::Green;
         predator = Team::Red;
 
-        preyRange = 100.0f;
+        preyRangeSqr = 10000.0f;
         preyStrength = 10.0f;
 
-        predatorRange = 100.0f;
+        predatorRangeSqr = 10000.0f;
         predatorStrength = 3.0f;
         break;
     case Team::Green:
         prey = Team::Red;
         predator = Team::Blue;
 
-        preyRange = 100.0f;
+        preyRangeSqr = 10000.0f;
         preyStrength = 7.0f;
 
-        predatorRange = 100.0f;
+        predatorRangeSqr = 10000.0f;
         predatorStrength = 7.0f;
         break;
     }
 }
 
-void Boid::addSeparation(Vector2& force, const Vector2& positionP) {
-	force = Vector2Add(force, Vector2Subtract(position, positionP));
+void Boid::addSeparation(Vector2 &force, const Vector2 &positionP) {
+    force = Vector2Add(force, Vector2Subtract(position, positionP));
 }
 
-void Boid::addCohesion(Vector2& force, const Vector2& positionP) {
-	force = Vector2Add(force, Vector2Subtract(positionP, position));
+void Boid::addCohesion(Vector2 &force, const Vector2 &positionP) {
+    force = Vector2Add(force, Vector2Subtract(positionP, position));
 }
 
-void Boid::addAlignment(Vector2& force, Boid* b) {
-	force = Vector2Add(force, b->getDirection());
+void Boid::addAlignment(Vector2 &force, Boid *b) {
+    force = Vector2Add(force, b->getDirection());
 }
 
-void Boid::checkAndAdd(Vector2& main, const Vector2& add, const float& strength) {
-    // useless for some, but makes sure that an empty force vector (one that wasn't affected at all) doesn't normalize to an inacurrate direction
+void Boid::checkAndAdd(Vector2 &main, const Vector2 &add,
+                       const float &strength) {
+    // useless for some, but makes sure that an empty force vector (one that
+    // wasn't affected at all) doesn't normalize to an inacurrate direction
     if (add.x != 0.0f || add.y != 0.0f) {
         main = Vector2Add(main, Vector2Scale(Vector2Normalize(add), strength));
     }
@@ -156,53 +156,67 @@ bool Boid::isColliding() {
 void Boid::update(float dt) {
     scale = Lerp(scale, 1.0f, 0.2f * dt);
 
-    Vector2 alignmentForce{ 0.0f, 0.0f };
-    Vector2 separationForce{ 0.0f, 0.0f };
-    Vector2 cohesionForce{ 0.0f, 0.0f };
-    Vector2 predatorForce{ 0.0f, 0.0f };
-    Vector2 preyForce{ 0.0f, 0.0f };
+    Vector2 alignmentForce{0.0f, 0.0f};
+    Vector2 separationForce{0.0f, 0.0f};
+    Vector2 cohesionForce{0.0f, 0.0f};
+    Vector2 predatorForce{0.0f, 0.0f};
+    Vector2 preyForce{0.0f, 0.0f};
 
     // calculating neighbours
-    /* Alignment, Cohesion, Prey/predator checks are wide and need to look further than their own cell, 
-    * however after 8 checks we have enough information to move on to separation/eating checks in our current cell only */
+    /* Alignment, Cohesion, Prey/predator checks are wide and need to look
+     * further than their own cell, however after 8 checks we have enough
+     * information to move on to separation/eating checks in our current cell
+     * only
+     */
     int alCoPr = 0;
     if (parent != nullptr) {
-        for (Cell* c : parent->getNeighbours()) {
-            for (Boid* b : c->getChildren()) {
-				if (alCoPr >= 8) {
-                    if (c != parent) { break; }
+        for (Cell *c : parent->getNeighbours()) {
+            for (Boid *b : c->getChildren()) {
+                if (alCoPr >= 8) {
+                    if (c != parent) {
+                        break;
+                    }
                 }
-                if (Vector2DotProduct(Vector2Normalize(Vector2Subtract(b->getPosition(), position)), direction) <= cone) {
+                if (Vector2DotProduct(Vector2Normalize(Vector2Subtract(
+                                          b->getPosition(), position)),
+                                      direction) <= cone) {
                     if (b->getTeam() == team) {
-                        if (Vector2Distance(b->getPosition(), position) <= separationRange * scale) {
+                        if (Vector2DistanceSqr(b->getPosition(), position) <=
+                            separationRangeSqr * scale) {
                             addSeparation(separationForce, b->getPosition());
                         }
-                        if (Vector2Distance(b->getPosition(), position) <= alignmentRange * scale) {
+                        if (Vector2DistanceSqr(b->getPosition(), position) <=
+                            alignmentRangeSqr * scale) {
                             alCoPr++;
                             addAlignment(alignmentForce, b);
                         }
-                        if (Vector2Distance(b->getPosition(), position) <= cohesionRange * scale) {
+                        if (Vector2DistanceSqr(b->getPosition(), position) <=
+                            cohesionRangeSqr * scale) {
                             addCohesion(cohesionForce, b->getPosition());
                         }
                     }
                     if (b->getTeam() == predator) {
-                        if (Vector2Distance(b->getPosition(), position) <= predatorRange * scale) {
+                        if (Vector2DistanceSqr(b->getPosition(), position) <=
+                            predatorRangeSqr * scale) {
                             alCoPr++;
                             addSeparation(predatorForce, b->getPosition());
                         }
                     }
                     if (b->getTeam() == prey) {
-                        if (Vector2Distance(b->getPosition(), position) <= preyRange * scale) {
+                        if (Vector2DistanceSqr(b->getPosition(), position) <=
+                            preyRangeSqr * scale) {
                             alCoPr++;
                             addCohesion(preyForce, b->getPosition());
                         }
-                        // WIN (change teams) 
-                        if (Vector2Distance(b->getPosition(), position) <= eatingRange * (b->getScale() + scale)) {
-                            if (scale < 2.5f) scale += 0.1f;
-                            if (b->getScale() > 0.7f) b->setScale(b->getScale() - 0.1f);
+                        // WIN (change teams)
+                        if (Vector2DistanceSqr(b->getPosition(), position) <=
+                            eatingRangeSqr * (b->getScale() + scale)) {
+                            if (scale < 2.5f)
+                                scale += 0.1f;
+                            if (b->getScale() > 0.7f)
+                                b->setScale(b->getScale() - 0.1f);
                             b->setTeam(predator);
                         }
-
                     }
                 }
             }
@@ -210,28 +224,28 @@ void Boid::update(float dt) {
     }
 
     // calculating walls
-    Vector2 wallForce = { 0.0f, 0.0f };
+    Vector2 wallForce = {0.0f, 0.0f};
 
-    if (position.x <= wallAvoidanceRange * scale) {
+    if (position.x <= wallAvoidanceRangeSqr * scale) {
         wallForce.x += 1.0f;
     }
-    if (GetRenderWidth() - position.x <= wallAvoidanceRange * scale) {
+    if (GetRenderWidth() - position.x <= wallAvoidanceRangeSqr * scale) {
         wallForce.x += -1.0f;
     }
-    if (position.y <= wallAvoidanceRange) {
+    if (position.y <= wallAvoidanceRangeSqr) {
         wallForce.y += 1.0f;
     }
-    if (GetRenderHeight() - position.y <= wallAvoidanceRange * scale) {
+    if (GetRenderHeight() - position.y <= wallAvoidanceRangeSqr * scale) {
         wallForce.y += -1.0f;
     }
 
     for (auto o : Obstacle::obstacles) {
-        if (o->overlaps(position, wallAvoidanceRange * scale)) {
-            addSeparation(wallForce, o -> getCenter());
+        if (o->overlaps(position, wallAvoidanceRangeSqr * scale)) {
+            addSeparation(wallForce, o->getCenter());
         }
     }
 
-    Vector2 force{ 0.0f, 0.0f };
+    Vector2 force{0.0f, 0.0f};
 
     // Add forces together
     checkAndAdd(force, wallForce, wallAvoidanceStrength * scale);
@@ -248,10 +262,13 @@ void Boid::update(float dt) {
     direction = Vector2Lerp(direction, force, steerStrength / smoothScale * dt);
     direction = Vector2Normalize(direction);
 
-    position = Vector2Add(position, Vector2Scale(direction, speed * smoothScale * dt));
-    
-    // Collisions hard code. If a fish still somehow hits a wall, walks backwards until he no longer does, and flip it's direction
-    // To avoid infinite loops, if the fish hasnt gotten out after 100 steps, teleport him elsewhere at random (hopefully not in another box)
+    position =
+        Vector2Add(position, Vector2Scale(direction, speed * smoothScale * dt));
+
+    // Collisions hard code. If a fish still somehow hits a wall, walks
+    // backwards until he no longer does, and flip it's direction To avoid
+    // infinite loops, if the fish hasnt gotten out after 100 steps, teleport
+    // him elsewhere at random (hopefully not in another box)
     bool hasHitWall = false;
     for (int i = 0; i < 100; i++) {
         if (!isColliding()) {
@@ -261,65 +278,45 @@ void Boid::update(float dt) {
         position = Vector2Subtract(position, direction);
     }
     if (isColliding()) {
-       setPosition({ (float)GetRandomValue(0, GetScreenWidth()), (float)GetRandomValue(0, GetScreenHeight()) });
+        setPosition({(float)GetRandomValue(0, GetScreenWidth()),
+                     (float)GetRandomValue(0, GetScreenHeight())});
     }
     if (hasHitWall) {
-        direction = Vector2({ -direction.x, -direction.y });
+        direction = Vector2({-direction.x, -direction.y});
     }
 
     if (parent == nullptr) {
-		for (Cell *c : Cell::cells) {
-			c->isInOrOut(this);
-		}
-    }
-    else {
-		for (Cell *c : parent->getNeighbours()) {
-			c->isInOrOut(this);
-		}
+        for (Cell *c : Cell::cells) {
+            c->isInOrOut(this);
+        }
+    } else {
+        for (Cell *c : parent->getNeighbours()) {
+            c->isInOrOut(this);
+        }
     }
 }
 
-const Vector2& Boid::getPosition() {
-    return position;
-}
+const Vector2 &Boid::getPosition() { return position; }
 
-void Boid::setPosition(const Vector2& positionP) {
+void Boid::setPosition(const Vector2 &positionP) {
     position = positionP;
     parent = nullptr;
 }
 
-const Vector2& Boid::getDirection() {
-    return direction;
-}
+const Vector2 &Boid::getDirection() { return direction; }
 
-void Boid::setDirection(const Vector2& directionP) {
-    direction = directionP;
-}
+void Boid::setDirection(const Vector2 &directionP) { direction = directionP; }
 
-const float& Boid::getScale() {
-    return scale;
-}
+const float &Boid::getScale() { return scale; }
 
-void Boid::setScale(const float& scaleP) {
-    scale = scaleP;
-}
+void Boid::setScale(const float &scaleP) { scale = scaleP; }
 
-const Team& Boid::getTeam() {
-    return team;
-}
+const Team &Boid::getTeam() { return team; }
 
-Cell* Boid::getParent() {
-    return parent;
-}
+Cell *Boid::getParent() { return parent; }
 
-void Boid::track() {
-    debug = true;
-}
+void Boid::track() { debug = true; }
 
-void Boid::untrack() {
-    debug = false;
-}
+void Boid::untrack() { debug = false; }
 
-void Boid::setParent(Cell* parentP) {
-    parent = parentP;
-}
+void Boid::setParent(Cell *parentP) { parent = parentP; }
