@@ -92,21 +92,21 @@ private:
     Team predator;
     Team prey;
 
-    float preyRange;
+    float preyRangeSqr;
     float preyStrength;
-    float predatorRange;
+    float predatorRangeSqr;
     float predatorStrength;
     float scale;
-    static float alignmentRange;
+    static float alignmentRangeSqr;
     static float alignmentStrength;
-    static float separationRange;
+    static float separationRangeSqr;
     static float separationStrength;
-    static float cohesionRange;
+    static float cohesionRangeSqr;
     static float cohesionStrength;
-    static float wallAvoidanceRange;
+    static float wallAvoidanceRangeSqr;
     static float wallAvoidanceStrength;
     static float steerStrength;
     static float cone;
     static float speed;
-    static float eatingRange;
+    static float eatingRangeSqr;
 };

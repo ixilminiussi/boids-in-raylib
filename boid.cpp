@@ -10,16 +10,16 @@
 
 std::vector<Boid *> Boid::boids = std::vector<Boid *>();
 
-float Boid::alignmentRangeSqr = 3600.0f;
+float Boid::alignmentRangeSqr = 360.0f;
 float Boid::alignmentStrength = 7.0f;
-float Boid::separationRangeSqr = 400.0f;
-float Boid::separationStrength = 10.0f;
+float Boid::separationRangeSqr = 300.0f;
+float Boid::separationStrength = 15.0f;
 float Boid::cohesionRangeSqr = 10000.0f;
 float Boid::cohesionStrength = 5.0f;
-float Boid::wallAvoidanceRangeSqr = 2500.0f;
+float Boid::wallAvoidanceRangeSqr = 30.0f;
 float Boid::wallAvoidanceStrength = 10.0f;
 float Boid::steerStrength = 10.0f;
-float Boid::cone = 0.2f;
+float Boid::cone = 0.5f;
 float Boid::speed = 150.0f;
 float Boid::eatingRangeSqr = 9.0f;
 
@@ -177,9 +177,10 @@ void Boid::update(float dt) {
                         break;
                     }
                 }
-                if (Vector2DotProduct(Vector2Normalize(Vector2Subtract(
-                                          b->getPosition(), position)),
-                                      direction) <= cone) {
+                float inFront = Vector2DotProduct(Vector2Normalize(Vector2Subtract(
+                    b->getPosition(), position)),
+                    direction);
+                if (inFront <= cone) {
                     if (b->getTeam() == team) {
                         if (Vector2DistanceSqr(b->getPosition(), position) <=
                             separationRangeSqr * scale) {
@@ -202,21 +203,23 @@ void Boid::update(float dt) {
                             addSeparation(predatorForce, b->getPosition());
                         }
                     }
-                    if (b->getTeam() == prey) {
-                        if (Vector2DistanceSqr(b->getPosition(), position) <=
-                            preyRangeSqr * scale) {
-                            alCoPr++;
-                            addCohesion(preyForce, b->getPosition());
-                        }
-                        // WIN (change teams)
-                        if (Vector2DistanceSqr(b->getPosition(), position) <=
-                            eatingRangeSqr * (b->getScale() + scale)) {
-                            if (scale < 2.5f)
-                                scale += 0.1f;
-                            if (b->getScale() > 0.7f)
-                                b->setScale(b->getScale() - 0.1f);
-                            b->setTeam(predator);
-                        }
+                    if (inFront < cone / 2.0f) {
+						if (b->getTeam() == prey) {
+							if (Vector2DistanceSqr(b->getPosition(), position) <=
+								preyRangeSqr * scale) {
+								alCoPr++;
+								addCohesion(preyForce, b->getPosition());
+							}
+							// WIN (change teams)
+							if (Vector2DistanceSqr(b->getPosition(), position) <=
+								eatingRangeSqr * (b->getScale() + scale)) {
+								if (scale < 2.5f)
+									scale += 0.1f;
+								if (b->getScale() > 0.7f)
+									b->setScale(b->getScale() - 0.1f);
+								b->setTeam(predator);
+							}
+						}
                     }
                 }
             }
