@@ -1,5 +1,7 @@
 # Boids!
 
+![image](https://github.com/user-attachments/assets/5118439e-85c4-49b9-b842-fd1a856c46c1)
+
 ### Main features
 - **Multiple families of boids hunting one another**
 - **Create and delete obstacles using your mouse**
@@ -13,10 +15,15 @@ Boids follow the standard rules of boids, however they also hunt one another acc
 
 ## Obstacles
 Obstacles prevent boids from reaching a given area. The user can easily:
-### Add a new obstacle using left click
-### Delete an existing one using right click
+1. Add a new obstacle using left click
+2. Delete an existing one using right click
+   
+![image](https://github.com/user-attachments/assets/b20bc9e4-4ad4-4c0d-8e7d-5c180b8b27a1)
 
 ## Optimisations
+
+![image](https://github.com/user-attachments/assets/c10b9958-cb22-491c-a109-230a013ff679)
+
 ### Toggle debug mode using *D*
 By using a bounding box, boids only need look at their neighbouring boids by fetching the neighbouring boxes and their children.
 As they move around, boids regularly ping the neighbouring cells to check if they have switched position.
