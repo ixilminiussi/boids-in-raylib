@@ -1,6 +1,7 @@
 # Boids!
 
-![image](https://github.com/user-attachments/assets/5118439e-85c4-49b9-b842-fd1a856c46c1)
+![image](https://github.com/user-attachments/assets/66ef5566-07d5-40ed-b016-910c960030c2)
+### [Watch the demo on youtube](https://youtu.be/TdexYwXqdPY)
 
 ### Main features
 - **Multiple families of boids hunting one another**
@@ -18,11 +19,11 @@ Obstacles prevent boids from reaching a given area. The user can easily:
 1. Add a new obstacle using left click
 2. Delete an existing one using right click
    
-![image](https://github.com/user-attachments/assets/b20bc9e4-4ad4-4c0d-8e7d-5c180b8b27a1)
+![image](https://github.com/user-attachments/assets/94c7b50a-ea40-48d7-94ef-e4b997c79fd3)
 
 ## Optimisations
 
-![image](https://github.com/user-attachments/assets/c10b9958-cb22-491c-a109-230a013ff679)
+![image](https://github.com/user-attachments/assets/551fbbe2-08e7-43b9-a12d-52ac065e89a9)
 
 ### Toggle debug mode using *D*
 By using a bounding box, boids only need look at their neighbouring boids by fetching the neighbouring boxes and their children.
