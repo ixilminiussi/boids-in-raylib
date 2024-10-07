@@ -13,7 +13,7 @@ Obstacle::~Obstacle() {
 
 void Obstacle::render() {
 	DrawRectangleRec(rectangle, BLACK);
-	DrawRectangleLinesEx(rectangle, 1.0f, WHITE);
+	DrawRectangleLinesEx(rectangle, 3.0f, WHITE);
 }
 
 void Obstacle::kill() {

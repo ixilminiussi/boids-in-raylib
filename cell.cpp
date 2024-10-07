@@ -40,7 +40,7 @@ void Cell::update() {
 }
 
 void Cell::render(const Color& color) {
-	DrawRectangleLinesEx(rectangle, 1.0f, color);
+	DrawRectangleLinesEx(rectangle, 2.0f, color);
 }
 
 void Cell::isInOrOut(Boid *boid) {

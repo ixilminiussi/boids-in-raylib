@@ -6,7 +6,7 @@
 #include "math.h"
 #include "obstacle.h"
 
-#define BOID_COUNT 2500.0f
+#define BOID_COUNT 4000.0f
 
 using namespace std;
 
@@ -30,7 +30,7 @@ void spawnNew(Team team, Texture *texture) {
 Vector2 mouseStart;
 
 int main() {
-    InitWindow(GetScreenWidth(), GetScreenHeight(), "Boids!");
+    InitWindow(1920, 1080, "Boids!");
     SetWindowState(FLAG_FULLSCREEN_MODE);
 
     Image sprite = LoadImage("WhiteFish.png");
