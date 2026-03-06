@@ -152,6 +152,12 @@
   <ItemGroup>
     <Image Include="WhiteFish.png" />
   </ItemGroup>
+  <Target Name="BuildRaylib" BeforeTargets="ClCompile" Condition="!Exists('$(SolutionDir)\build\raylib\bin\$(Platform)\$(Configuration)\raylib.lib')">
+    <MakeDir Directories="$(SolutionDir)\build\raylib\bin\$(Platform)\$(Configuration)" />
+    <Exec Command="cmake -S &quot;$(SolutionDir)\raylib&quot; -B &quot;$(SolutionDir)\build\raylib\cmake\$(Platform)\$(Configuration)&quot; -A $(Platform) -DCMAKE_CONFIGURATION_TYPES=$(Configuration)" />
+    <Exec Command="cmake --build &quot;$(SolutionDir)\build\raylib\cmake\$(Platform)\$(Configuration)&quot; --config $(Configuration)" />
+    <Exec Command="copy /Y &quot;$(SolutionDir)\build\raylib\cmake\$(Platform)\$(Configuration)\raylib\$(Configuration)\raylib.lib&quot; &quot;$(SolutionDir)\build\raylib\bin\$(Platform)\$(Configuration)\raylib.lib&quot;" />
+  </Target>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
